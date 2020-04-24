@@ -1,0 +1,125 @@
+html, body {
+  font-family: 'Lato', sans-serif;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+  font-size: 1rem;
+  background-color: #fff;
+  position: relative;
+}
+
+body {
+  line-height: 1.3;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button {
+  display: block;
+  background-color: transparent;
+  width: 100%;
+  font-size: inherit;
+  border: none;
+  cursor: pointer;
+  outline: none;
+  padding: .4em;
+  color: #555;
+}
+
+button:hover, button:focus {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+input {
+  font-family: inherit;
+  font-size: 1em;
+  background-color: transparent;
+}
+
+textarea {
+  font-family: inherit;
+  display: block;
+  width: 100%;
+  font-size: 1em;
+  border: none;
+  background-color: transparent;
+}
+
+.container {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 960px;
+  padding: 0 15px;
+}
+
+.tmr-list:empty+button {
+  display: none;
+}
+
+.tmr-list {
+  display: grid;
+  grid-gap: 1em;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.tmr-list__item {
+  position: relative;
+  background-color: #eee;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 1fr auto;
+}
+
+.tmr-list__item.active {
+  background-color: #4d4;
+}
+
+.tmr-list__item__timer {
+  cursor: pointer;
+  text-align: center;
+  padding: .1em;
+  font-size: 2.25em;
+  user-select: none;
+  grid-column: 1 / 3;
+}
+
+.tmr-list__item__title {
+  cursor: pointer;
+  text-align: center;
+  padding: .1em 1em;
+  outline: none;
+  font-size: 1.5em;
+  border: none;
+  grid-column: 1 / 3;
+}
+
+.tmr-list__item__created {
+  padding: .5em;
+  font-size: .7em;
+}
+
+
+.tmr-list__item__controls {
+  text-align: right;
+}
+
+.tmr-list__item__controls button {
+  padding: .5em;
+  display: inline-block;
+  width: 2em;
+}
+
+.tmr-list__addbtn {
+  background-color: rgba(0, 0, 0, 0.1);
+  font-size: 2.5rem;
+  padding-top: .5em;
+  padding-bottom: .5em;
+  margin-bottom: 15px;
+  margin-top: 15px;
+}

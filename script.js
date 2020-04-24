@@ -1,22 +1,17 @@
 (function(){
     "use strict";
 
-    var state = [{}];
+    var config = {};
     
     var template = `<div class="tmr-list__item">
-        <div class="tmr-list__item__menu">
-            <button class="tmr-list__item__menubtn"><i class="fas fa-bars"></i></button>
-            <div class="tmr-list__item__controls">
-                <button class="tmr-list__item__controls__removebtn"><i class="fas fa-trash"></i></button>
-                <button class="tmr-list__item__controls__editbtn"><i class="fas fa-pen"></i></button>
-                <div class="tmr-list__item__controls__btngroup">
-                    <button class="tmr-list__item__controls__moveupbtn"><i class="fas fa-chevron-up"></i></button>
-                    <button class="tmr-list__item__controls__movedownbtn"><i class="fas fa-chevron-down"></i></button>
-                </div>
-            </div>
+        <div class="tmr-list__item__created"></div>
+        <div class="tmr-list__item__controls">
+            <button class="tmr-list__item__controls__removebtn"><i class="fas fa-trash"></i></button>
+            <button class="tmr-list__item__controls__editbtn"><i class="fas fa-pen"></i></button>
+            <button class="tmr-list__item__controls__movedownbtn"><i class="fas fa-chevron-down"></i></button>
         </div>
-        <div class="tmr-list__item__timer">00:00</div>
-        <textarea class="tmr-list__item__notes" spellcheck="false"></textarea>
+        <input class="tmr-list__item__title" spellcheck="false" />
+        <div class="tmr-list__item__timer">00:59</div>
     </div>`;
 
     
@@ -71,6 +66,16 @@
         var sum = getSummedTime($item);
         var formatted = formatDuration(sum);
         $item.find('.tmr-list__item__timer').text(formatted);
+        if($item.data('created')){
+            let format = 'dddd, HH:mm [Uhr]';
+            if(moment().isSame(moment($item.data('created')),'day')) {
+                format = '[Heute]';
+            }
+            else if(moment().diff($item.data('created'), 'days') > 6) {
+                format = 'DD.MM.YYYY';
+            }
+            $item.find('.tmr-list__item__created').text(moment($item.data('created')).format(format));
+        }
     }
 
     var updateGlobalView = function(force = false){
@@ -107,10 +112,15 @@
             var $item = $(item);
             return {
                 data: $item.data(),
-                description: $item.find('.tmr-list__item__notes').val()
+                description: $item.find('.tmr-list__item__title').val()
             }
         });
-        localStorage.setItem('tmr',JSON.stringify(items));
+
+        var data = {
+            items: items,
+            config: config,
+        };
+        localStorage.setItem('tmr',JSON.stringify(data));
     };
 
     var loadFromStorage = function(){
@@ -118,14 +128,18 @@
         var $newItem;
         if(!localStorage.tmr) return;
         data = JSON.parse(localStorage.tmr);
-        for(var i = 0; i < data.length; i++){
-            $newItem = $(template);
-            if(data[i].data.running) $newItem.addClass('active');
-            $newItem.find('.tmr-list__item__notes').val(data[i].description);
-            $newItem.data(data[i].data);
-            $newItem.appendTo('.tmr-list');
 
-            adjustNotesHeight($newItem.find('.tmr-list__item__notes'));
+
+        config = data.config || {
+            startTimer: 0
+        };
+        var items = data.items || data;
+        for(var i = 0; i < items.length; i++){
+            $newItem = $(template);
+            if(items[i].data.running) $newItem.addClass('active');
+            $newItem.find('.tmr-list__item__title').val(items[i].description);
+            $newItem.data(items[i].data);
+            $newItem.appendTo('.tmr-list');
         }
     }
 
@@ -133,11 +147,6 @@
     var ticker = setInterval(function(){
         updateGlobalView();
     },1000);
-
-    var adjustNotesHeight = function($notes){
-        $notes.innerHeight('');
-        $notes.innerHeight($notes.prop('scrollHeight'));
-    }
 
     $(document).on('click','.tmr-list__item__timer',function(e){
         var $item = $(this).closest('.tmr-list__item');
@@ -150,8 +159,7 @@
         };
     })
 
-    $(document).on('keydown keyup change','.tmr-list__item__notes',function(){
-        adjustNotesHeight($(this));
+    $(document).on('keydown keyup change','.tmr-list__item__title',function(){
         saveToStorage();
     });
     $(document).on('click','.tmr-list__item__controls__editbtn',function(){
@@ -175,13 +183,7 @@
         $(this).closest('.tmr-list__item').remove();
         saveToStorage();
     });
-    $(document).on('click','.tmr-list__item__controls__moveupbtn',function(){
-        var $item = $(this).closest('.tmr-list__item');
-        if($item.prev().length){
-            $item.insertBefore($item.prev());
-        }
-        saveToStorage();
-    });
+
     $(document).on('click','.tmr-list__item__controls__movedownbtn',function(){
         var $item = $(this).closest('.tmr-list__item');
         if($item.next().length){
@@ -196,10 +198,12 @@
         
         play($newItem);
         
-        if($(this).data('pos') === 'before') $newItem.prependTo('.tmr-list');
-        if($(this).data('pos') === 'after') $newItem.appendTo('.tmr-list');
-        adjustNotesHeight($newItem.find('.tmr-list__item__notes').focus());
+        $newItem.data('created',Date.now());
+        $newItem.data('time',(config.startTimer || 0)*1000);
+        $newItem.prependTo('.tmr-list');
+        $newItem.find('.tmr-list__item__title').focus();
         saveToStorage();
+        updateItemView($newItem);
     });
 
 
