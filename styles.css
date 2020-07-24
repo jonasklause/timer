@@ -54,7 +54,7 @@ textarea {
 .container {
   margin-left: auto;
   margin-right: auto;
-  max-width: 960px;
+  max-width: 1200px;
   padding: 0 15px;
 }
 
@@ -62,10 +62,26 @@ textarea {
   display: none;
 }
 
+
 .tmr-list {
-  display: grid;
-  grid-gap: 1em;
-  grid-template-columns: repeat(3, 1fr);
+    display: grid;
+    grid-gap: 1em;
+    grid-template-columns: 1fr;
+}
+@media (min-width: 640px){
+    .tmr-list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (min-width: 960px){
+    .tmr-list {
+      grid-template-columns: repeat(3, 1fr);
+    }
+}
+@media (min-width: 1200px){
+    .tmr-list {
+      grid-template-columns: repeat(4, 1fr);
+    }
 }
 
 .tmr-list__item {
