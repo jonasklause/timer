@@ -79,10 +79,14 @@
     }
 
     var updateGlobalView = function(force = false){
+        var sum = 0;
         $('.tmr-list__item').each(function(){
             var $this = $(this);
+            sum += getSummedTime($this);
             if(force || getRunningTime($this)) updateItemView($this);
-        });
+        })
+        .promise()
+        .done( function(){ $('.tmr-sum').text('Summe: ' + formatDuration(sum)); } );
     }
 
     var parseTime = function(text){
@@ -123,6 +127,7 @@
         localStorage.setItem('tmr',JSON.stringify(data));
     };
 
+
     var loadFromStorage = function(){
         var data;
         var $newItem;
@@ -154,7 +159,8 @@
             pause($item);
         } 
         else {
-            if(!e.ctrlKey) pauseAll();
+            console.log(e);
+            if(! (e.ctrlKey || e.metaKey)) pauseAll();
             play($item)
         };
     })
@@ -194,7 +200,7 @@
 
     $(document).on('click','.tmr-list__addbtn',function(e){
         var $newItem = $(template);
-        if(!e.ctrlKey) pauseAll();
+        if(! (e.ctrlKey || e.metaKey)) pauseAll();
         
         play($newItem);
         
@@ -212,4 +218,10 @@
         updateGlobalView(true);
     });
     
+    window.timer = {
+        setStartTimer: function(x) {
+            config.startTimer = x;
+            saveToStorage();
+        }
+    }
 })();
