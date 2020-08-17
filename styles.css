@@ -143,3 +143,24 @@ textarea {
 .tmr-sum {
     margin-top: 1em;
 }
+
+.tmr-list__item__titlewrap {
+    width: 100%;
+    grid-column: 1 / 3;
+    text-align: center;
+    min-height: 2rem;
+    overflow-x: hidden;
+}
+
+.tmr-list__item__title2 {
+    white-space: nowrap; 
+    min-height: 2rem;
+    display: inline-block;
+    font-size: 300%;
+    outline: none;
+}
+.tmr-list__item__title2:empty {
+    background-color: rgba(0,0,0,.05);
+    min-width: 100%;
+}
+

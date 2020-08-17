@@ -10,7 +10,9 @@
             <button class="tmr-list__item__controls__editbtn"><i class="fas fa-pen"></i></button>
             <button class="tmr-list__item__controls__movedownbtn"><i class="fas fa-chevron-down"></i></button>
         </div>
-        <input class="tmr-list__item__title" spellcheck="false" />
+        <div class="tmr-list__item__titlewrap">
+            <span contenteditable="" class="tmr-list__item__title2"></span>
+        </div>
         <div class="tmr-list__item__timer">00:59</div>
     </div>`;
 
@@ -33,9 +35,11 @@
     var resetRunningStart = function (item){
         item.data('running', 0);
     }
+
     var getSummedTime = function(item){
         return getSavedTime(item) + getRunningTime(item);
     }
+
     var pause = function($item){
         if(!getRunningTime($item)) return;
         addSavedTime($item, getRunningTime($item));
@@ -43,6 +47,14 @@
         $item.removeClass('active');
         saveToStorage();
     }
+
+    var resizeTitle = function($item){
+        var title = $item.find('.tmr-list__item__title2').get(0);
+        // title.style.fontSize = '100%';
+        var currentSize = parseFloat((title.style.fontSize.match(/(.*)%/) || ['250%', '250'])[1]);
+        title.style.fontSize = Math.min(250, currentSize * (title.parentElement.offsetWidth - 20) / title.offsetWidth ) + '%';
+    }
+
     var pauseAll = function(){
         $('.tmr-list__item').each(function(){
             var $item = $(this);
@@ -55,6 +67,7 @@
         $item.addClass('active');
         saveToStorage();
     }    
+
     var formatDuration = function(ms){
         var s = Math.floor((ms / 1000) % 60);
         var m = Math.floor((ms / (1000 * 60)) % 60);
@@ -75,6 +88,7 @@
                 format = 'DD.MM.YYYY';
             }
             $item.find('.tmr-list__item__created').text(moment($item.data('created')).format(format));
+            resizeTitle($item);
         }
     }
 
@@ -116,7 +130,7 @@
             var $item = $(item);
             return {
                 data: $item.data(),
-                description: $item.find('.tmr-list__item__title').val()
+                description: $item.find('.tmr-list__item__title2').html()
             }
         });
 
@@ -139,10 +153,13 @@
             startTimer: 0
         };
         var items = data.items || data;
+        $('.tmr-list').html('');
         for(var i = 0; i < items.length; i++){
             $newItem = $(template);
             if(items[i].data.running) $newItem.addClass('active');
             $newItem.find('.tmr-list__item__title').val(items[i].description);
+            $newItem.find('.tmr-list__item__title2').html(items[i].description);
+            resizeTitle($newItem);
             $newItem.data(items[i].data);
             $newItem.appendTo('.tmr-list');
         }
@@ -165,9 +182,12 @@
         };
     })
 
-    $(document).on('keydown keyup change','.tmr-list__item__title',function(){
+    $(document).on('keydown keyup change','.tmr-list__item__title2',function(){
+        var $item = $(this).closest('.tmr-list__item');
+        resizeTitle($item);
         saveToStorage();
     });
+
     $(document).on('click','.tmr-list__item__controls__editbtn',function(){
         var $item = $(this).closest('.tmr-list__item');
         var parsedTime, newTime;
@@ -185,6 +205,7 @@
         }
         saveToStorage();
     });
+
     $(document).on('click','.tmr-list__item__controls__removebtn',function(){
         $(this).closest('.tmr-list__item').remove();
         saveToStorage();
@@ -207,13 +228,17 @@
         $newItem.data('created',Date.now());
         $newItem.data('time',(config.startTimer || 0)*1000);
         $newItem.prependTo('.tmr-list');
-        $newItem.find('.tmr-list__item__title').focus();
+        $newItem.find('.tmr-list__item__title2').focus();
         saveToStorage();
         updateItemView($newItem);
     });
 
-
     $(document).ready(function(){
+        loadFromStorage();
+        updateGlobalView(true);
+    });
+
+    $(window).focus(function() {
         loadFromStorage();
         updateGlobalView(true);
     });
